@@ -1,0 +1,32 @@
+---
+# NOTE: That didn't work, thus use of instance with nested virtualization enabled.
+
+compute_engine_instance:
+  image_project: cirrus-images
+  image: family/docker-kvm
+  platform: linux
+  cpu: 4
+  memory: 16G
+  disk: 100
+  nested_virtualization: true
+
+#env:
+#  S3CMD_ACCESS_KEY:
+#  S3CMD_BUCKET:
+#  S3CMD_HOST:
+#  S3CMD_SECRET_KEY:
+
+build_task:
+  pre_script:
+    - apt-get update
+    - apt-get install -y python3.8 python3-pip
+
+  pip_install_script:
+    - pip install -r requirements.txt
+
+  build_script:
+    - ironic-python-agent-builder -o ./ipa-ubuntu --release focal -e dynamic-login -e extra-hardware ubuntu
+    - ironic-python-agent-builder -o ./ipa-centos --release 8 -e dynamic-login -e extra-hardware centos
+
+  #publish_script:
+  #  - bash ./cirrus-publish.sh
