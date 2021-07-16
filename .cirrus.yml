@@ -24,9 +24,13 @@ build_task:
   pip_install_script:
     - pip install -r requirements.txt
 
-  build_script:
+  build_generic_images_script:
     - ironic-python-agent-builder -o ./ipa-ubuntu --release focal -e dynamic-login -e extra-hardware ubuntu
     - ironic-python-agent-builder -o ./ipa-centos --release 8 -e dynamic-login -e extra-hardware centos
+
+  build_proliant_images_script:
+    - ironic-python-agent-builder -o ./ipa-ubuntu-proliant --release focal -e dynamic-login -e extra-hardware -e proliant-tools ubuntu
+    - ironic-python-agent-builder -o ./ipa-centos-proliant --release 8 -e dynamic-login -e extra-hardware -e proliant-tools centos
 
   #publish_script:
   #  - bash ./cirrus-publish.sh

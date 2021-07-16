@@ -18,3 +18,9 @@ ironic-python-agent-builder -o ./ipa-ubuntu --release focal -e dynamic-login -e 
 CentOS 8
 ironic-python-agent-builder -o ./ipa-centos --release 8 -e dynamic-login -e extra-hardware centos
 ```
+
+### HPE Proliant Tools
+
+```bash
+ironic-python-agent-builder -o ./ipa-ubuntu-proliant --release focal -e dynamic-login -e extra-hardware -e proliant-tools ubuntu
+```
