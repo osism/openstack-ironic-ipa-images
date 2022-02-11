@@ -1,6 +1,4 @@
 ---
-# NOTE: That didn't work, thus use of instance with nested virtualization enabled.
-
 compute_engine_instance:
   image_project: cirrus-images
   image: family/docker-kvm
@@ -10,19 +8,18 @@ compute_engine_instance:
   disk: 100
   nested_virtualization: true
 
-#env:
-#  S3CMD_ACCESS_KEY:
-#  S3CMD_BUCKET:
-#  S3CMD_HOST:
-#  S3CMD_SECRET_KEY:
+env:
+  MINIO_ACCESS_KEY: "ENCRYPTED[!c85a5b06195e06226b58d4942dfe82c8732f74994b5dd4015f0d4dccad36a7e2b28120429366b69bb3bd2cd85b1cb5ab!]"
+  MINIO_SECRET_KEY: "ENCRYPTED[!af79fd66b5d6cdde7aab229041fe45b422a22d7dc315b08fb7f8b7eb6c612b78156c27270ca230501874c4bd1705a8ca!]"
 
 build_task:
-  pre_script:
+  install_script:
     - apt-get update
-    - apt-get install -y python3.8 python3-pip
-
-  pip_install_script:
-    - pip install -r requirements.txt
+    - apt-get install -y python3-pip
+    - pip3 install -r requirements.txt
+    - wget https://dl.min.io/client/mc/release/linux-amd64/mc
+    - chmod +x mc
+    - ./mc alias set minio https://minio.services.osism.tech $MINIO_ACCESS_KEY $MINIO_SECRET_KEY
 
   build_generic_images_script:
     - ironic-python-agent-builder -o ./ipa-ubuntu --release focal -e dynamic-login -e extra-hardware ubuntu
@@ -36,5 +33,7 @@ build_task:
     - ironic-python-agent-builder -o ./ipa-proliant-ubuntu --release focal -e dynamic-login -e extra-hardware -e burn-in -e proliant-tools ubuntu
     - ironic-python-agent-builder -o ./ipa-proliant-centos --release 8 -e dynamic-login -e extra-hardware -e burn-in -e proliant-tools centos
 
-  #publish_script:
-  #  - bash ./cirrus-publish.sh
+  push_script: |
+    if [ "$CIRRUS_BRANCH" == "main" ]; then
+      ./mc policy set download minio/openstack-ironic-ipa-images
+    fi
